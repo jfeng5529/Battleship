@@ -76,6 +76,7 @@ class Battleship:
         # player's turn
         else:
             player.check_round(opponent, msg)
+            self.check_game_status() 
             self.print_map(player)
     
 
@@ -95,6 +96,7 @@ class Battleship:
         os.system('cls||clear')
 
         print("Player 1 get ready")
+        self.mode = "multi"
         self.start_game()
 
     #single player mode

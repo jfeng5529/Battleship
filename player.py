@@ -42,7 +42,7 @@ class Player:
             return True
 
     #return if the attack is a hit or miss
-    def check_round(self, opponent, msg="none"):
+    def check_round(self, opponent):
         #generate random attacks
         point = self.input_location(0, msg)
         x = point[0]
