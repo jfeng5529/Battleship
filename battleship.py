@@ -185,6 +185,10 @@ class Battleship:
             player.miss(x, y, msg)
 
     def check_game_status(self):
+        """ Check to see if any player wins
+            there are total 18 squares occupied by ships
+            if there are 18 x or hits, then game ends and winner is set to player
+        """
         val = sum(x.count('X') for x in self.player1.opponent_map)
         if val == 18:
             self.game = False
@@ -196,18 +200,25 @@ class Battleship:
             self.win = "Player2"
             return
 
+    #General process of each game round
+    # -if input is valid, and update player map with hit or miss
+    # - end game is anyone wins
     def round(self, player, opponent, msg="none"):
+        #if playing single mode computer's turn
         if msg == "none":
-            val = [random.randint(0, 9), random.randint(0, 9)]
+            val = [random.randint(0, 9), random.randint(0, 9)] #generate random attacks
             self.check_round(val, player, opponent, msg)
-            self.check_game_status()
+            self.check_game_status() 
+        # player's turn
         else:
             val = self.get_input(msg, player)
             self.check_round(val, player, opponent)
             self.print_map(player)
     
-
+    # mutiplayer mode general process
     def mulit_game(self):
+
+        # initialized players maps with their ships
         print("Player 1 get ready")
         print(self.player1.print_player_map())
         self.intialize_map(self.player1)
@@ -216,6 +227,8 @@ class Battleship:
         print(self.player1.print_player_map())
         self.intialize_map(self.player2)
 
+        #start game loop alterating between player one and two
+        #loop breaks if anyone wins
         while(self.game):
 
             msg = "Player 1 enter your attack"
@@ -230,29 +243,39 @@ class Battleship:
 
         print("Congrates! {} won the game! You can save the world".format(self.win))
 
+    #Auto generate ship placement for computer's ships
     def generate_map(self, size):
+
+        #pick if horizantal or vertical
         if random.randint(0, 1) == 1:
+            #if horizantal then any row, but column is restricted
             start_letter = random.choice("ABCDEFGHIJ")
             start_number = random.randint(0, 4)
             return [[start_letter, start_number],
                 [start_letter, start_number+size - 1]]
         else:
+            #if horizantal then any row, but row is restricted
             start_letter = random.choice("ABCDE")
             start_number = random.randint(0, 9)
             return [[start_letter, start_number],
                 [chr(ord(start_letter) + size - 1), start_number]]
 
+    #single player mode
     def single_game(self):
+        #loop thru ships to set up computer map
         for key in self.location.keys():
             for i in range(self.location[key][0]):
                 self.input_location(self.location[key][1], self.player2)
 
+        #set up player map
         print(self.player1.print_player_map())
         self.intialize_map(self.player1)
         print("Player 1 get ready")
 
+        #start game loop
         while(self.game):
 
+            #alternate rounds between players
             msg = "Player 1 enter your attack"
             self.round(self.player1, self.player2, msg)
             if self.game == False:
@@ -265,6 +288,7 @@ class Battleship:
                 self.win ="Player2"
             print("===============================================================================\n")
 
+    #test mode so no need to set up maps
     def start_test_mode(self, mode):
         self.player1.player_map = [["X", "X", "X", "X", "X", "-", "-", "-", "-", "-"],
                                   ["X", "X", "X", "X", "-",
@@ -319,7 +343,7 @@ class Battleship:
                                   ["-", "-", "-", "-", "-", "-", "-", "-", "-", "-"]]
             self.mulit_game()
 
-
+    #start the game by picking single or multi
     def start(self):
         val=self.chose_mode("Which mode would you like to play? Enter multiplayer or singleplayer  ")
         if val == "multiplayer":
