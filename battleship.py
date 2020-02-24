@@ -1,18 +1,19 @@
 import random
-from pandas import *
+from pandas import DataFrame
 
+#setting up player class
 class Player:
     def __init__(self):
         self.player_map = [["-"]*10 for i in range(10)]
         self.opponent_map = [['-']*10 for i in range(10)]
 
     def setUpMap(self, location, direction):
-        # setting up player map
+        """setting up player map base on two points"""
         x, y = location[0]
         x2, y2 = location[1]
         if direction == "h":
             temp = []
-            for i in range(y, y2+1):
+            for i in range(y, y2):
                 if self.player_map[x][i] != "-":
                     return False
                 else:
@@ -20,7 +21,7 @@ class Player:
             self.player_map[x][min(y, y2):max(y, y2)] = temp
             return True
         else:
-            for i in range(x, x2+1):
+            for i in range(x, x2):
                 if self.player_map[i][y] != "-":
                     return False
             for i in range(x, x2+1):
@@ -31,6 +32,7 @@ class Player:
         if msg == "player":
             print("You hit their ship!")
         else:
+            print('Player2 choose to hit ({},{})'.format(x, y))
             print("You got attacked!")
         self.opponent_map[x][y] = "X"
 
@@ -38,6 +40,7 @@ class Player:
         if msg == "player":
             print("You missed oh no!")
         else:
+            print('Player2 choose to hit ({},{})'.format(x, y))
             print("Yay! They missed!")
         self.opponent_map[x][y] = "O"
 
@@ -70,24 +73,24 @@ class Battleship:
         self.allShips = 18
         self.location = {"Aircraft Carrier": [1, 5], "Battleship": [
             1, 4], "Crusier": [1, 3], "Destroyer": [2, 2], "Submarine": [2, 1]}
-        self.player1.player_map = [["X", "X", "X", "X", "X", "-", "-", "-", "-", "-"],
-                                  ["X", "X", "X", "X", "-",
-                                      "-", "-", "-", "-", "-"],
-                                  ["X", "X", "X", "-", "-",
-                                      "-", "-", "-", "-", "-"],
-                                  ["X", "X", "-", "-", "-",
-                                      "-", "-", "-", "-", "-"],
-                                  ["X", "X", "-", "-", "-",
-                                      "-", "-", "-", "-", "-"],
-                                  ["X", "-", "-", "-", "-",
-                                      "-", "-", "-", "-", "-"],
-                                  ["X", "-", "-", "-", "-",
-                                      "-", "-", "-", "-", "-"],
-                                  ["-", "-", "-", "-", "-",
-                                      "-", "-", "-", "-", "-"],
-                                  ["-", "-", "-", "-", "-",
-                                      "-", "-", "-", "-", "-"],
-                                  ["-", "-", "-", "-", "-", "-", "-", "-", "-", "-"]]
+        # self.player1.player_map = [["X", "X", "X", "X", "X", "-", "-", "-", "-", "-"],
+        #                           ["X", "X", "X", "X", "-",
+        #                               "-", "-", "-", "-", "-"],
+        #                           ["X", "X", "X", "-", "-",
+        #                               "-", "-", "-", "-", "-"],
+        #                           ["X", "X", "-", "-", "-",
+        #                               "-", "-", "-", "-", "-"],
+        #                           ["X", "X", "-", "-", "-",
+        #                               "-", "-", "-", "-", "-"],
+        #                           ["X", "-", "-", "-", "-",
+        #                               "-", "-", "-", "-", "-"],
+        #                           ["X", "-", "-", "-", "-",
+        #                               "-", "-", "-", "-", "-"],
+        #                           ["-", "-", "-", "-", "-",
+        #                               "-", "-", "-", "-", "-"],
+        #                           ["-", "-", "-", "-", "-",
+        #                               "-", "-", "-", "-", "-"],
+        #                           ["-", "-", "-", "-", "-", "-", "-", "-", "-", "-"]]
 
         # self.player2.player_map = [["X","X", "X", "X", "X", "-","-","-","-","-"],
         #                           ["X","X", "X", "X", "-", "-","-","-","-","-"],
@@ -179,7 +182,7 @@ class Battleship:
             try:
                 userInput = input(msg).upper()
                 point = [userInput[0], int(userInput[1:])-1]
-                if len(userInput) > 3 or point[0] > "J" or point[1] > 9:
+                if len(userInput) > 3 or point[0] > "J" or point[1] > 9 or point[1] < 0:
                     raise InvalidEntry
             except (TypeError, InvalidEntry) as _:
                 print("Please enter a valid point")
@@ -230,10 +233,10 @@ class Battleship:
 
     def mulitGame(self):
         print("Player 1 get ready")
-        # self.intializeMap(self.player1)
+        self.intializeMap(self.player1)
 
         print("Player 2 get ready")
-        # self.intializeMap(self.player2)
+        self.intializeMap(self.player2)
 
         while(self.game):
 
@@ -266,7 +269,7 @@ class Battleship:
             for i in range(self.location[key][0]):
                  self.inputLocation(self.location[key][1], self.player2)
 
-        # self.intializeMap(self.player1)
+        self.intializeMap(self.player1)
         print("Player 1 get ready")
 
         while(self.game):
@@ -283,20 +286,15 @@ class Battleship:
                 self.win ="Player2"
 
             print("===============================================================================\n")
-        # self.intializeMap(self.player1)
 
 
     def start(self):
-        # val=self.choseMode("Which mode would you like to play? Enter multiplayer or singleplayer  ")
-        # if val == "multiplayer":
-        #     print("You have chosen the multiplayer game, let's get started")
-        #     self.mulitGame()
-        # else:
-        #     self.singleGame()
-
-        self.singleGame()
-    
-
+        val=self.choseMode("Which mode would you like to play? Enter multiplayer or singleplayer  ")
+        if val == "multiplayer":
+            print("You have chosen the multiplayer game, let's get started")
+            self.mulitGame()
+        else:
+            self.singleGame()
 
 
 game = Battleship()
