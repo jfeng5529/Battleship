@@ -116,7 +116,7 @@ class Battleship:
         for key in self.location.keys():
             for i in range(self.location[key][0]):
                 self.input_location(
-                     self.location[key][1], player, "Where do you want to place the {} ({} squares) in the format of (point, point)".format(key, self.location[key][1]))
+                     self.location[key][1], player, "Where do you want to place the {} ({} squares) in the format of (point, point) ex A1,A5 or A1 for one square".format(key, self.location[key][1]))
                 print(player.print_player_map())
 
     def chose_mode(self, message):
