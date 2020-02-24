@@ -1,79 +1,19 @@
 import random
 from pandas import DataFrame
+from player import Player
+from customExceptions import *
 
-#setting up player class
-class Player:
-    def __init__(self):
-        self.player_map = [["-"]*10 for i in range(10)]
-        self.opponent_map = [['-']*10 for i in range(10)]
-
-    def setUpMap(self, location, direction):
-        """setting up player map base on two points"""
-        x, y = location[0]
-        x2, y2 = location[1]
-        if direction == "h":
-            temp = []
-            for i in range(y, y2):
-                if self.player_map[x][i] != "-":
-                    return False
-                else:
-                    temp.append("X")
-            self.player_map[x][min(y, y2):max(y, y2)] = temp
-            return True
-        else:
-            for i in range(x, x2):
-                if self.player_map[i][y] != "-":
-                    return False
-            for i in range(x, x2+1):
-                self.player_map[i][y] = "X"
-            return True
-
-    def hit(self, x, y, msg ):
-        if msg == "player":
-            print("You hit their ship!")
-        else:
-            print('Player2 choose to hit ({},{})'.format(x, y))
-            print("You got attacked!")
-        self.opponent_map[x][y] = "X"
-
-    def miss(self, x, y, msg ):
-        if msg == "player":
-            print("You missed oh no!")
-        else:
-            print('Player2 choose to hit ({},{})'.format(x, y))
-            print("Yay! They missed!")
-        self.opponent_map[x][y] = "O"
-
-    def printOpponentMap(self):
-        return DataFrame(self.opponent_map)
-
-    def printPlayerMap(self):
-        return DataFrame(self.player_map)
-
-
-
-class InvalidEntry(Exception):
-    pass
-
-
-class InvalidSize(Exception):
-    pass
-
-
-class AlreadyTaken(Exception):
-    pass
-
-
+#setting up Battleship class
 class Battleship:
     def __init__(self):
         self.player1 = Player()
         self.player2 = Player()
         self.game = True
         self.win = ""
-        self.allShips = 18
+        self.all_ships = 18
         self.location = {"Aircraft Carrier": [1, 5], "Battleship": [
             1, 4], "Crusier": [1, 3], "Destroyer": [2, 2], "Submarine": [2, 1]}
-        # self.player1.player_map = [["X", "X", "X", "X", "X", "-", "-", "-", "-", "-"],
+        # self.player1.player_map = [[X", "X", "X", "X", "X", "-", "-", "-", "-", "-"],
         #                           ["X", "X", "X", "X", "-",
         #                               "-", "-", "-", "-", "-"],
         #                           ["X", "X", "X", "-", "-",
@@ -103,41 +43,59 @@ class Battleship:
         #                           ["-", "-", "-", "-", "-","-","-","-","-","-"],
         #                           ["-", "-", "-", "-", "-","-","-","-","-","-"]]
 
-    def inputLocation(self, size, player, message="none"):
-        max = 65
+    def input_location(self, size, player, message="none"):
 
+        """ Take userinput and make sure they are valid range wise and format wise"""
+
+        max = 65
         while True:
             try:
+                #if single player then generate_map computes possible points
                 if message == "none":
-                    userInput = self.generateMap(size)
-                    point1 = (userInput[0][0], userInput[0][1])
-                    point2 = (userInput[1][0], userInput[1][1])
+                    user_input = self.generate_map(size)
+                    point1 = (abs(max - ord(user_input[0][0])), user_input[0][1])
+                    point2 = (abs(max - ord(user_input[1][0])), user_input[1][1])
                 else:
-                    userInput = input(message)
-                    userInput = userInput.upper().split(",")
-                    if len(userInput) != 2:
+                # if multi player then parse point from user input using ascii code
+                    user_input = input(message)
+                    if size == 1:
+                        user_input = [user_input.upper(), user_input.upper()]
+                    else:
+                        user_input = user_input.upper().split(",")
+                    
+                    if len(user_input) != 2:
                         raise InvalidEntry
-                    point1 = (userInput[0][0], int(userInput[0][1:])-1)
-                    point2 = (userInput[1][0], int(userInput[1][1:])-1)
-
-                if point1[0] > 'J' or point1[1] > 10 or point2[0] > 'J' or point2[1] > 10:
+                    point1 = (abs(max - ord(user_input[0][0])), int(user_input[0][1:])-1)
+                    point2 = (abs(max - ord(user_input[1][0])), int(user_input[1][1:])-1)
+                
+                #if point is not in the range of (10,10), the raise out of bound error
+                if not all( 0 <= value <= 9 for value in [point1[0], point1[1], point2[0], point2[1]]):
                     raise InvalidEntry
+
+                #if valid then attempt to set up map with coordinates for horizontal
+                #if set_up_map returns false if spot is taken, exception raised
+
                 elif point1[0] == point2[0] and abs(point1[1] - point2[1]) == size-1:
-                    constant = abs(max - ord(point1[0]))
-                    coordinates = [(constant,
-                        point1[1]), (constant, point2[1])]
-                    if player.setUpMap(coordinates, "h") == False:
+                    coordinates = [(point1[0],
+                        point1[1]), (point2[0], point2[1])]
+
+                    if player.set_up_map(coordinates, "h") == False:
                         raise AlreadyTaken
-                elif point1[1] == point2[1] and abs(ord(point1[0]) - ord(point2[0])) == size-1:
-                    constant = point1[1]
-                    coordinates = [(abs(max - ord(point1[0])), constant),
-                                   (abs(max - ord(point2[0])), constant)]
-                    if player.setUpMap(coordinates, "v") == False:
+                
+                #if valid then attempt to set up map with coordinates for vertical
+                #if set_up_map returns false if spot is taken, exception raised
+
+                elif point1[1] == point2[1] and abs(point1[0] - point2[0]) == size-1:
+                    coordinates = [( point1[0], point1[1]),
+                                   ( point2[0], point1[1])]
+                    if player.set_up_map(coordinates, "v") == False:
                         raise AlreadyTaken
+
+                #user selected spots not equal to the squares of the ship, exception raised
                 else:
                     raise InvalidSize
 
-            except InvalidEntry:
+            except (InvalidEntry, ValueError) as _:
                 print("please follow the format and enter the valid locations")
                 continue
             except InvalidSize:
@@ -150,21 +108,26 @@ class Battleship:
             else:
                 return
 
-    def intializeMap(self, player):
+    def intialize_map(self, player):
+
+        """setting up map. Loops through all possible ship and calls input_location to ask for 
+            userinput for placement of ships. Prints out the updated player map after each addition
+        """
         for key in self.location.keys():
             for i in range(self.location[key][0]):
-                self.inputLocation(
+                self.input_location(
                      self.location[key][1], player, "Where do you want to place the {} ({} squares) in the format of (point, point)".format(key, self.location[key][1]))
-                print(player.printPlayerMap())
+                print(player.print_player_map())
 
-    def choseMode(self, message):
+    def chose_mode(self, message):
+
+        """ collect the game mode multi or singluar from user, loops until valid response is collected """
+
         while True:
-
             try:
-                userInput = input(message).lower()
-                print(userInput)
-                if userInput == "multiplayer" or userInput == "singleplayer":
-                    return userInput
+                user_input = input(message).lower()
+                if user_input == "multiplayer" or user_input == "singleplayer":
+                    return user_input
                 else:
                     raise InvalidEntry
 
@@ -172,43 +135,56 @@ class Battleship:
                 print("Please enter multiplayer or singleplayer")
                 continue
 
-    def printMap(self, player):
+    # prints out current player's opponenet map
+    def print_map(self, player):
         print("Opponent Map")
-        print(player.printOpponentMap())
+        print(player.print_opponent_map())
 
-    def getInput(self, msg):
-        max = 65
+    def get_input(self, msg, player):
+
+        """ get valid attack inputs from user"""
+
+        maxRow = 65 # the row starts at A or 65
         while True:
             try:
-                userInput = input(msg).upper()
-                point = [userInput[0], int(userInput[1:])-1]
-                if len(userInput) > 3 or point[0] > "J" or point[1] > 9 or point[1] < 0:
+                #collected user input and stored parsed points
+                user_input = input(msg).upper()
+                point = [abs(max - ord(user_input[0])), int(user_input[1:])-1]
+
+                #raise exception is input is out of bound or already chosen
+                if len(user_input) > 3 or point[0] > 9 or point[1] > 9 or point[1] < 0:
                     raise InvalidEntry
+                if self.repeated(point[0], point[1],player):
+                    raise AlreadyTaken
+
             except (TypeError, InvalidEntry) as _:
                 print("Please enter a valid point")
                 continue
+            except AlreadyTaken:
+                print("Already attacked this point before, try another one")
+                continue
             else:
-                point[0] = abs(max - ord(userInput[0]))
+                point[0] = abs(max - ord(user_input[0]))
                 return (point)
 
-    def checkRound(self, point, player, opponent, msg ="player"):
-        x = point[0]
-        y = point[1]
-        def repeated(x, y):
+    #check to see if point is chosen before - True if not, False if it has
+    def repeated(self,x, y, player):
             if player.opponent_map[x][y] != "-":
                 return True
             else:
                 return False
 
-        if repeated(x, y):
-            print("Already attacked this point before, try another one")
-        else:
-            if opponent.player_map[x][y] == "X":
-                player.hit(x, y, msg)
-            else:
-                player.miss(x, y, msg)
+    #return if the attack is a hit or miss
+    def check_round(self, point, player, opponent, msg ="player"):
+        x = point[0]
+        y = point[1]
 
-    def checkGameStatus(self):
+        if opponent.player_map[x][y] == "X":
+            player.hit(x, y, msg)
+        else:
+            player.miss(x, y, msg)
+
+    def check_game_status(self):
         val = sum(x.count('X') for x in self.player1.opponent_map)
         if val == 18:
             self.game = False
@@ -223,20 +199,22 @@ class Battleship:
     def round(self, player, opponent, msg="none"):
         if msg == "none":
             val = [random.randint(0, 9), random.randint(0, 9)]
-            self.checkRound(val, player, opponent, msg)
-            self.checkGameStatus()
+            self.check_round(val, player, opponent, msg)
+            self.check_game_status()
         else:
-            val = self.getInput(msg)
-            self.checkRound(val, player, opponent)
-            self.printMap(player)
+            val = self.get_input(msg, player)
+            self.check_round(val, player, opponent)
+            self.print_map(player)
     
 
-    def mulitGame(self):
+    def mulit_game(self):
         print("Player 1 get ready")
-        self.intializeMap(self.player1)
+        print(self.player1.print_player_map())
+        self.intialize_map(self.player1)
 
         print("Player 2 get ready")
-        self.intializeMap(self.player2)
+        print(self.player1.print_player_map())
+        self.intialize_map(self.player2)
 
         while(self.game):
 
@@ -252,24 +230,25 @@ class Battleship:
 
         print("Congrates! {} won the game! You can save the world".format(self.win))
 
-    def generateMap(self, size):
+    def generate_map(self, size):
         if random.randint(0, 1) == 1:
-            startLetter = random.choice("ABCDEFGHIJ")
-            startNumber = random.randint(0, 4)
-            return [[startLetter, startNumber],
-                [startLetter, startNumber+size - 1]]
+            start_letter = random.choice("ABCDEFGHIJ")
+            start_number = random.randint(0, 4)
+            return [[start_letter, start_number],
+                [start_letter, start_number+size - 1]]
         else:
-            startLetter = random.choice("ABCDE")
-            startNumber = random.randint(0, 9)
-            return [[startLetter, startNumber],
-                [chr(ord(startLetter) + size - 1), startNumber]]
+            start_letter = random.choice("ABCDE")
+            start_number = random.randint(0, 9)
+            return [[start_letter, start_number],
+                [chr(ord(start_letter) + size - 1), start_number]]
 
-    def singleGame(self):
+    def single_game(self):
         for key in self.location.keys():
             for i in range(self.location[key][0]):
-                 self.inputLocation(self.location[key][1], self.player2)
+                self.input_location(self.location[key][1], self.player2)
 
-        self.intializeMap(self.player1)
+        print(self.player1.print_player_map())
+        self.intialize_map(self.player1)
         print("Player 1 get ready")
 
         while(self.game):
@@ -284,17 +263,71 @@ class Battleship:
             self.round(self.player2, self.player1)
             if self.game == False:
                 self.win ="Player2"
-
             print("===============================================================================\n")
+
+    def start_test_mode(self, mode):
+        self.player1.player_map = [["X", "X", "X", "X", "X", "-", "-", "-", "-", "-"],
+                                  ["X", "X", "X", "X", "-",
+                                      "-", "-", "-", "-", "-"],
+                                  ["X", "X", "X", "-", "-",
+                                      "-", "-", "-", "-", "-"],
+                                  ["X", "X", "-", "-", "-",
+                                      "-", "-", "-", "-", "-"],
+                                  ["X", "X", "-", "-", "-",
+                                      "-", "-", "-", "-", "-"],
+                                  ["X", "-", "-", "-", "-",
+                                      "-", "-", "-", "-", "-"],
+                                  ["X", "-", "-", "-", "-",
+                                      "-", "-", "-", "-", "-"],
+                                  ["-", "-", "-", "-", "-",
+                                      "-", "-", "-", "-", "-"],
+                                  ["-", "-", "-", "-", "-",
+                                      "-", "-", "-", "-", "-"],
+                                  ["-", "-", "-", "-", "-", "-", "-", "-", "-", "-"]]
+        if mode == 'single':
+            while(self.game):
+
+                msg = "Player 1 enter your attack"
+                self.round(self.player1, self.player2, msg)
+                if self.game == False:
+                    break
+                print('\n')
+
+                print("It's player2's turn")
+                self.round(self.player2, self.player1)
+                if self.game == False:
+                    self.win ="Player2"
+                print("===============================================================================\n")
+        else:
+            self.player1.player_map = [["X", "X", "X", "X", "X", "-", "-", "-", "-", "-"],
+                                  ["X", "X", "X", "X", "-",
+                                      "-", "-", "-", "-", "-"],
+                                  ["X", "X", "X", "-", "-",
+                                      "-", "-", "-", "-", "-"],
+                                  ["X", "X", "-", "-", "-",
+                                      "-", "-", "-", "-", "-"],
+                                  ["X", "X", "-", "-", "-",
+                                      "-", "-", "-", "-", "-"],
+                                  ["X", "-", "-", "-", "-",
+                                      "-", "-", "-", "-", "-"],
+                                  ["X", "-", "-", "-", "-",
+                                      "-", "-", "-", "-", "-"],
+                                  ["-", "-", "-", "-", "-",
+                                      "-", "-", "-", "-", "-"],
+                                  ["-", "-", "-", "-", "-",
+                                      "-", "-", "-", "-", "-"],
+                                  ["-", "-", "-", "-", "-", "-", "-", "-", "-", "-"]]
+            self.mulit_game()
 
 
     def start(self):
-        val=self.choseMode("Which mode would you like to play? Enter multiplayer or singleplayer  ")
+        val=self.chose_mode("Which mode would you like to play? Enter multiplayer or singleplayer  ")
         if val == "multiplayer":
-            print("You have chosen the multiplayer game, let's get started")
-            self.mulitGame()
+            print("You have chosen the multiplayer mode, let's get started")
+            self.mulit_game()
         else:
-            self.singleGame()
+            print("You have chosen the singleplayer mode, let's get started")
+            self.single_game()
 
 
 game = Battleship()
