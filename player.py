@@ -76,9 +76,12 @@ class Player:
                 
                 user_input = input(msg).upper()
                 if size == 0:
-                    points = [abs(max - ord(user_input[0])), int(user_input[1:])-1]
-                    self.validate(points, size)
-                    return points
+                    if len(user_input) < 2:
+                        raise InvalidEntry
+                    else:
+                        points = [abs(max - ord(user_input[0])), int(user_input[1:])-1]
+                        self.validate(points, size)
+                        return points
                     
                 else:
                     if size == 1:

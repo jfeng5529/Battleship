@@ -10,6 +10,7 @@ class Battleship:
     def __init__(self):
         self.player1 = Player()
         self.player2 = Player()
+        self.mode = "single"
         self.game = True
         self.win = ""
         self.all_ships = 18
@@ -23,7 +24,7 @@ class Battleship:
         """
         for key in self.location.keys():
             for i in range(self.location[key][0]):
-                player.input_location( self.location[key][1],"Where do you want to place the {} ({} squares) in the format of ex (A1, A5) or A1 for one square ".format(key, self.location[key][1]))
+                player.input_location( self.location[key][1],"Where do you want to place the {} ({} squares) in the format of ex (A1,A5) or A1 for one square ".format(key, self.location[key][1]))
                 print(player.print_player_map())
 
     def chose_mode(self, message):
@@ -77,6 +78,7 @@ class Battleship:
             player.check_round(opponent, msg)
             self.print_map(player)
     
+
     # mutiplayer mode general process
     def mulit_game(self):
 
@@ -92,21 +94,8 @@ class Battleship:
         self.intialize_map(self.player2)
         os.system('cls||clear')
 
-        #start game loop alterating between player one and two
-        #loop breaks if anyone wins
-        while(self.game):
-
-            msg = "Player 1 enter your attack"
-            self.round(self.player1, self.player2, msg)
-            if self.game == False:
-                break
-            
-            msg = "Player 2 enter your attack"
-            self.round(self.player2, self.player1, msg)
-            if self.game == False:
-                self.win = "Player2"
-
-        print("Congrates! {} won the game! You can save the world".format(self.win))
+        print("Player 1 get ready")
+        self.start_game()
 
     #single player mode
     def single_game(self):
@@ -122,6 +111,10 @@ class Battleship:
         print("Player 1 get ready")
 
         #start game loop
+        self.start_game()
+
+    #start main game loop
+    def start_game(self):
         while(self.game):
 
             #alternate rounds between players
@@ -131,11 +124,38 @@ class Battleship:
                 break
             print('\n')
 
-            print("It's player2's turn")
-            self.round(self.player2, self.player1)
+            if self.mode == 'multi':
+                self.round(self.player2, self.player1,"Player 2 enter your attack" )
+            else:
+                self.round(self.player2, self.player1)
             if self.game == False:
                 self.win ="Player2"
             print("===============================================================================\n")
+
+        print("Congrates! {} won the game! You can save the world".format(self.win))
+
+        self.another_round()
+    
+    #if user wants another round
+    def another_round(self):
+        while True:
+            try:
+                user_input = input("Are you up for another round? Enter yes or no").upper()
+                if user_input == "YES":
+                    self.start()
+                elif user_input == "NO":
+
+                    raise InvalidEntry
+            except (InvalidEntry, ValueError, TypeError) as _:
+                print("please enter yes or no")
+                continue
+            else:
+                if user_input == "YES":
+                    self.start()
+                    return
+                else:
+                    print("Bye bye")
+                    return
 
     #test mode so no need to set up maps
     def start_test_mode(self, mode):
