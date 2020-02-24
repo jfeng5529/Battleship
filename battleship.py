@@ -144,12 +144,12 @@ class Battleship:
 
         """ get valid attack inputs from user"""
 
-        maxRow = 65 # the row starts at A or 65
+        max_row = 65 # the row starts at A or 65
         while True:
             try:
                 #collected user input and stored parsed points
                 user_input = input(msg).upper()
-                point = [abs(max - ord(user_input[0])), int(user_input[1:])-1]
+                point = [abs(max_row - ord(user_input[0])), int(user_input[1:])-1]
 
                 #raise exception is input is out of bound or already chosen
                 if len(user_input) > 3 or point[0] > 9 or point[1] > 9 or point[1] < 0:
@@ -164,7 +164,7 @@ class Battleship:
                 print("Already attacked this point before, try another one")
                 continue
             else:
-                point[0] = abs(max - ord(user_input[0]))
+                point[0] = abs(max_row - ord(user_input[0]))
                 return (point)
 
     #check to see if point is chosen before - True if not, False if it has
@@ -355,7 +355,7 @@ class Battleship:
 
 
 game = Battleship()
-game.start()
+game.start_test_mode("single")
 
 
     
