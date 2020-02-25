@@ -7,65 +7,70 @@ class ComputerPlayer(Player):
     def __init__(self):
         super().__init__()
 
-    def input_location(self, size):
+    def get_input_location(self, size):
 
         """ Take userinput and make sure they are valid range wise and format wise"""
 
-        max = 65
         while True:
             try:
-                #if single player then generate_map computes possible points
-                user_input = self.generate_map(size)
-                point1 = (abs(max - ord(user_input[0][0])), user_input[0][1])
-                point2 = (abs(max - ord(user_input[1][0])), user_input[1][1])
+                #if single player then genrate_point computes possible points
+                user_input = self.genrate_point(size)
+                point1 = (user_input[0][0], user_input[0][1])
+                point2 = (user_input[1][0], user_input[1][1])
                 
-                self.validate([point1[0], point1[1], point2[0], point2[1]],size)
+                x  = min(point1[0], point2[0])
+                x2 = max(point1[0], point2[0])
+                y  = min(point1[1], point2[1])
+                y2 = max(point1[1], point2[1])
+
+                point1 =(x,y)
+                point2 = (x2,y2)
+
+                direction = self.validate(size, point1, point2)
 
             except (InvalidEntry, ValueError, TypeError) as _:
-                print("please follow the format and enter the valid locations")
                 continue
             except InvalidSize:
-                print("ship is not able to fit on the given input")
                 continue
             except AlreadyTaken:
                 continue
             else:
-                return
+                return [(point1), (point2), direction]
 
     #Auto generate ship placement for computer's ships
-    def generate_map(self, size):
+    def genrate_point(self, size):
 
         #pick if horizantal or vertical
         if random.randint(0, 1) == 1:
             #if horizantal then any row, but column is restricted
-            start_letter = random.choice("ABCDEFGHIJ")
-            start_number = random.randint(0, 4)
-            return [[start_letter, start_number],
-                [start_letter, start_number+size - 1]]
+            start_x = random.randint(0, 9)
+            start_y = random.randint(0, 9-(size-1))
+            return [[start_x, start_y],
+                [start_x, start_y+size - 1]]
         else:
             #if horizantal then any row, but row is restricted
-            start_letter = random.choice("ABCDE")
-            start_number = random.randint(0, 9)
-            return [[start_letter, start_number],
-                [chr(ord(start_letter) + size - 1), start_number]]
+            start_x = random.randint(0, 9-(size-1))
+            start_y = random.randint(0, 9)
+            return [(start_x, start_y),
+                (start_x + size - 1, start_y)]
     
     #when player makes a hit if single then show the point
     def hit(self, x, y):
-        print('Player2 choose to hit ({},{})'.format(x, y))
+        print('Player2 choose to hit ({},{})'.format(chr(x+65), y+1))
         print("You got attacked!")
         self.opponent_map[x][y] = "X"
 
     #when player makes a miss if single then show the point
     def miss(self, x, y):
-        print('Player2 choose to hit ({},{})'.format(x, y))
+        print('Player2 choose to hit ({},{})'.format(chr(x+65), y+1))
         print("Yay! They missed!")
         self.opponent_map[x][y] = "O"
     
     #return if the attack is a hit or miss
-    def check_round(self, opponent):
-        x = random.randint(0, 9)
-        y = random.randint(0, 9)
+    def attack(self, opponent):
 
+        point = self.get_input_location(0)
+        x,y = point[0]
         if opponent.player_map[x][y] == "X":
             self.hit(x, y)
         else:

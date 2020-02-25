@@ -19,12 +19,13 @@ class Battleship:
 
     def intialize_map(self, player):
 
-        """setting up map. Loops through all possible ship and calls input_location to ask for 
+        """setting up map. Loops through all possible ship and calls get_input_location to ask for 
             userinput for placement of ships. Prints out the updated player map after each addition
         """
         for key in self.location.keys():
             for i in range(self.location[key][0]):
-                player.input_location( self.location[key][1],"Where do you want to place the {} ({} squares) in the format of ex (A1,A5) or A1 for one square ".format(key, self.location[key][1]))
+                coordinates = player.get_input_location( self.location[key][1],"Where do you want to place the {} ({} squares) in the format of ex (A1,A5) or A1 for one square ".format(key, self.location[key][1]))
+                player.set_up_map(coordinates[0:2], coordinates[2])
                 print(player.print_player_map())
 
     def chose_mode(self, message):
@@ -58,12 +59,11 @@ class Battleship:
         if val == 18:
             self.game = False
             self.win = "Player1"
-            return
-        val = sum(x.count('X') for x in self.player2.opponent_map)
-        if val == 18:
-            self.game = False
-            self.win = "Player2"
-            return
+        else:
+            val = sum(x.count('X') for x in self.player2.opponent_map)
+            if val == 18:
+                self.game = False
+                self.win = "Player2"
 
     #General process of each game round
     # -if input is valid, and update player map with hit or miss
@@ -71,11 +71,11 @@ class Battleship:
     def round(self, player, opponent, msg="none"):
         #if playing single mode computer's turn
         if msg == "none":
-            player.check_round(opponent)
+            player.attack(opponent)
             self.check_game_status() 
         # player's turn
         else:
-            player.check_round(opponent, msg)
+            player.attack(opponent, msg)
             self.check_game_status() 
             self.print_map(player)
     
@@ -105,11 +105,13 @@ class Battleship:
         #loop thru ships to set up computer map
         for key in self.location.keys():
             for i in range(self.location[key][0]):
-                self.player2.input_location( self.location[key][1])
+                coordinates = self.player2.get_input_location( self.location[key][1])
+                self.player2.set_up_map(coordinates[0:2], coordinates[2])
 
         #set up player map
         print(self.player1.print_player_map())
         self.intialize_map(self.player1)
+        os.system('cls||clear')
         print("Player 1 get ready")
 
         #start game loop
@@ -122,17 +124,13 @@ class Battleship:
             #alternate rounds between players
             msg = "Player 1 enter your attack"
             self.round(self.player1, self.player2, msg)
-            if self.game == False:
-                break
-            print('\n')
+            print("===============================================================================")
 
             if self.mode == 'multi':
                 self.round(self.player2, self.player1,"Player 2 enter your attack" )
             else:
                 self.round(self.player2, self.player1)
-            if self.game == False:
-                self.win ="Player2"
-            print("===============================================================================\n")
+            print("===============================================================================")
 
         print("Congrates! {} won the game! You can save the world".format(self.win))
 
@@ -182,24 +180,13 @@ class Battleship:
                                   ["-", "-", "-", "-", "-", "-", "-", "-", "-", "-"]]
         for key in self.location.keys():
             for i in range(self.location[key][0]):
-                self.player2.input_location(self.location[key][1])
+                coordinates = self.player2.get_input_location( self.location[key][1])
+                self.player2.set_up_map(coordinates[0:2], coordinates[2])
         
         print(self.player2.print_player_map())
 
         if mode == 'single':
-            while(self.game):
-
-                msg = "Player 1 enter your attack"
-                self.round(self.player1, self.player2, msg)
-                if self.game == False:
-                    break
-                print('\n')
-
-                print("It's player2's turn")
-                self.round(self.player2, self.player1)
-                if self.game == False:
-                    self.win ="Player2"
-                print("===============================================================================\n")
+            self.start_game()
         else:
             self.player1.player_map = [["X", "X", "X", "X", "X", "-", "-", "-", "-", "-"],
                                   ["X", "X", "X", "X", "-",
@@ -233,9 +220,9 @@ class Battleship:
 
 
 game = Battleship()
-game.start()
+#game.start()
 
 #uncomment if u want to do test mode
-#game.start_test_mode('single')
+game.start_test_mode('single')
 
     
