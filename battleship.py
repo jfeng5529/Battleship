@@ -24,7 +24,7 @@ class Battleship:
         """
         for key in self.location.keys():
             for i in range(self.location[key][0]):
-                coordinates = player.get_input_location( self.location[key][1],"Where do you want to place the {} ({} squares) in the format of ex (A1,A5) or A1 for one square ".format(key, self.location[key][1]))
+                coordinates = player.get_input_location( self.location[key][1],"Where do you want to place the {} ({} squares) in the format of ex A1,A5 or A1 for one square ".format(key, self.location[key][1]))
                 player.set_up_map(coordinates[0:2], coordinates[2])
                 print(player.print_player_map())
 
@@ -125,6 +125,8 @@ class Battleship:
             msg = "Player 1 enter your attack"
             self.round(self.player1, self.player2, msg)
             print("===============================================================================")
+            if self.game == False:
+                break
 
             if self.mode == 'multi':
                 self.round(self.player2, self.player1,"Player 2 enter your attack" )
@@ -182,31 +184,10 @@ class Battleship:
             for i in range(self.location[key][0]):
                 coordinates = self.player2.get_input_location( self.location[key][1])
                 self.player2.set_up_map(coordinates[0:2], coordinates[2])
-        
-        print(self.player2.print_player_map())
+    
 
-        if mode == 'single':
-            self.start_game()
-        else:
-            self.player1.player_map = [["X", "X", "X", "X", "X", "-", "-", "-", "-", "-"],
-                                  ["X", "X", "X", "X", "-",
-                                      "-", "-", "-", "-", "-"],
-                                  ["X", "X", "X", "-", "-",
-                                      "-", "-", "-", "-", "-"],
-                                  ["X", "X", "-", "-", "-",
-                                      "-", "-", "-", "-", "-"],
-                                  ["X", "X", "-", "-", "-",
-                                      "-", "-", "-", "-", "-"],
-                                  ["X", "-", "-", "-", "-",
-                                      "-", "-", "-", "-", "-"],
-                                  ["X", "-", "-", "-", "-",
-                                      "-", "-", "-", "-", "-"],
-                                  ["-", "-", "-", "-", "-",
-                                      "-", "-", "-", "-", "-"],
-                                  ["-", "-", "-", "-", "-",
-                                      "-", "-", "-", "-", "-"],
-                                  ["-", "-", "-", "-", "-", "-", "-", "-", "-", "-"]]
-            self.mulit_game()
+        
+        self.start_game()
 
     #start the game by picking single or multi
     def start(self):
@@ -220,9 +201,9 @@ class Battleship:
 
 
 game = Battleship()
-#game.start()
+game.start()
 
 #uncomment if u want to do test mode
-game.start_test_mode('single')
+#game.start_test_mode('single')
 
     

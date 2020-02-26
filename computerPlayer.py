@@ -48,7 +48,7 @@ class ComputerPlayer(Player):
             return [[start_x, start_y],
                 [start_x, start_y+size - 1]]
         else:
-            #if horizantal then any row, but row is restricted
+            #if vertical then any row, but row is restricted
             start_x = random.randint(0, 9-(size-1))
             start_y = random.randint(0, 9)
             return [(start_x, start_y),
