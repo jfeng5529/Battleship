@@ -100,7 +100,7 @@ class Player:
                 print("Spot is already occupied, find another one")
                 continue
             else:
-                return [(point1), (point2), direction]
+                return [point1, point2, direction]
      
 
     def validate(self, size, point1, point2):

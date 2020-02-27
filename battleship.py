@@ -17,9 +17,9 @@ class Battleship:
         self.location = {"Aircraft Carrier": [1, 5], "Battleship": [
             1, 4], "Crusier": [1, 3], "Destroyer": [2, 2], "Submarine": [2, 1]}
 
-    def intialize_map(self, player):
+    def intialize_map_multi(self, player):
 
-        """setting up map. Loops through all possible ship and calls get_input_location to ask for 
+        """setting up map for multiplayer. Loops through all possible ship and calls get_input_location to ask for 
             userinput for placement of ships. Prints out the updated player map after each addition
         """
         for key in self.location.keys():
@@ -27,15 +27,27 @@ class Battleship:
                 coordinates = player.get_input_location( self.location[key][1],"Where do you want to place the {} ({} squares) in the format of ex A1,A5 or A1 for one square ".format(key, self.location[key][1]))
                 player.set_up_map(coordinates[0:2], coordinates[2])
                 print(player.print_player_map())
+            
+    def intialize_map_single(self, player):
 
+        """setting up map for single player. Loops through all possible ship and calls get_input_location from computer player 
+            to generate random ship placement
+        """
+        for key in self.location.keys():
+            for i in range(self.location[key][0]):
+                coordinates = player.get_input_location( self.location[key][1]) 
+                player.set_up_map(coordinates[0:2], coordinates[2])
+                print(player.print_player_map())
     def chose_mode(self, message):
 
-        """ collect the game mode multi or singluar from user, loops until valid response is collected """
+        """ collect the game mode multi or singluar from user, loops until valid response is collected
+            enter testsingle or testmulti to open the test mode of the application
+        """
 
         while True:
             try:
                 user_input = input(message).lower()
-                if user_input == "multiplayer" or user_input == "singleplayer":
+                if user_input == "multiplayer" or user_input == "singleplayer" or user_input == "testmulti" or user_input == "testsingle":
                     return user_input
                 else:
                     raise InvalidEntry
@@ -86,13 +98,13 @@ class Battleship:
         # initialized players maps with their ships
         print("Player 1 get ready")
         print(self.player1.print_player_map()) #pre print the empty map, so player can see where to put the ship
-        self.intialize_map(self.player1) 
+        self.intialize_map_multi(self.player1) 
         os.system('cls||clear')  #clear terminal after player1 is done, so player2 cant view the ship locations
 
         #same for player2
         print("Player 2 get ready")
         print(self.player2.print_player_map())
-        self.intialize_map(self.player2)
+        self.intialize_map_multi(self.player2)
         os.system('cls||clear')
 
         print("Player 1 get ready")
@@ -103,14 +115,11 @@ class Battleship:
     def single_game(self):
         self.player2 = ComputerPlayer()
         #loop thru ships to set up computer map
-        for key in self.location.keys():
-            for i in range(self.location[key][0]):
-                coordinates = self.player2.get_input_location( self.location[key][1])
-                self.player2.set_up_map(coordinates[0:2], coordinates[2])
+        self.intialize_map_single(self.player1)
 
         #set up player map
         print(self.player1.print_player_map())
-        self.intialize_map(self.player1)
+        self.intialize_map_multi(self.player1)
         os.system('cls||clear')
         print("Player 1 get ready")
 
@@ -159,9 +168,9 @@ class Battleship:
                     print("Bye bye")
                     return
 
-    #test mode so no need to set up maps
+    #test mode that prefills the player maps, so we can just test the attack portion
     def start_test_mode(self, mode):
-        self.player2 = ComputerPlayer()
+    #Prefill the player map for player1
         self.player1.player_map = [["X", "X", "X", "X", "X", "-", "-", "-", "-", "-"],
                                   ["X", "X", "X", "X", "-",
                                       "-", "-", "-", "-", "-"],
@@ -169,24 +178,27 @@ class Battleship:
                                       "-", "-", "-", "-", "-"],
                                   ["X", "X", "-", "-", "-",
                                       "-", "-", "-", "-", "-"],
-                                  ["X", "X", "-", "-", "-",
+                                  ["-", "-", "-", "-", "-",
                                       "-", "-", "-", "-", "-"],
-                                  ["X", "-", "-", "-", "-",
+                                  ["-", "-", "-", "-", "-",
                                       "-", "-", "-", "-", "-"],
-                                  ["X", "-", "-", "-", "-",
+                                  ["-", "-", "-", "-", "-",
                                       "-", "-", "-", "-", "-"],
                                   ["-", "-", "-", "-", "-",
                                       "-", "-", "-", "-", "-"],
                                   ["-", "-", "-", "-", "-",
                                       "-", "-", "-", "-", "-"],
                                   ["-", "-", "-", "-", "-", "-", "-", "-", "-", "-"]]
-        for key in self.location.keys():
-            for i in range(self.location[key][0]):
-                coordinates = self.player2.get_input_location( self.location[key][1])
-                self.player2.set_up_map(coordinates[0:2], coordinates[2])
-    
+        #single mode, auto generate the computer map
+        if mode =="single":
+            self.player2=ComputerPlayer()
+            self.intialize_map_single(self.player2)
+        #multi mode, set player2 map the same as player1 map
+        else:
+            self.player2.player_map = self.player1.player_map
+            self.mode = "multi"
+            self.player2.print_player_map()
 
-        
         self.start_game()
 
     #start the game by picking single or multi
@@ -195,9 +207,15 @@ class Battleship:
         if val == "multiplayer":
             print("You have chosen the multiplayer mode, let's get started")
             self.mulit_game()
-        else:
+        elif val == "singleplayer":
             print("You have chosen the singleplayer mode, let's get started")
             self.single_game()
+        elif val == "testmulti":
+            print("You have chosen the testing multi mode")
+            self.start_test_mode("multi")
+        else:
+            print("You have chosen the testing single mode")
+            self.start_test_mode("single")
 
 
 game = Battleship()
