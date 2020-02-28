@@ -37,7 +37,7 @@ class Battleship:
             for i in range(self.location[key][0]):
                 coordinates = player.get_input_location( self.location[key][1]) 
                 player.set_up_map(coordinates[0:2], coordinates[2])
-                print(player.print_player_map())
+
     def chose_mode(self, message):
 
         """ collect the game mode multi or singluar from user, loops until valid response is collected
@@ -115,7 +115,7 @@ class Battleship:
     def single_game(self):
         self.player2 = ComputerPlayer()
         #loop thru ships to set up computer map
-        self.intialize_map_single(self.player1)
+        self.intialize_map_single(self.player2)
 
         #set up player map
         print(self.player1.print_player_map())
@@ -197,7 +197,6 @@ class Battleship:
         else:
             self.player2.player_map = self.player1.player_map
             self.mode = "multi"
-            self.player2.print_player_map()
 
         self.start_game()
 
@@ -220,8 +219,5 @@ class Battleship:
 
 game = Battleship()
 game.start()
-
-#uncomment if u want to do test mode
-#game.start_test_mode('single')
 
     
